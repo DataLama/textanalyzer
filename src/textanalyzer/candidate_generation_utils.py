@@ -29,7 +29,7 @@ from .data_utils import InputText, TextFeature
 
 class Tokenization:
     """Base Class for Tokenization. This can be applied line by line."""
-    def __call__(self, doc: InputText) -> TextFeature:
+    def __call__(self, doc: InputText) -> InputText:
         """Tokenize the data with callable format."""
         # Initialize the variables
         title_tokens = []
@@ -41,14 +41,15 @@ class Tokenization:
         if doc.title:
             title_tokens, title_pos = self._postprocess(self.tokenize(self._preprocess(self._normalize(doc.title))))
         if doc.content:
-            content_tokens, content_pos = self._postprocess(self.tokenize(self._preprocess(self._normalize(doc.title))))
+            content_tokens, content_pos = self._postprocess(self.tokenize(self._preprocess(self._normalize(doc.content))))
         
-        return TextFeature(
-            title_tokens = title_tokens,
-            content_tokens = content_tokens,
-            title_pos = title_pos,
-            content_pos = content_pos
-            )
+        # add the tokenization result
+        doc.title_tokens = title_tokens
+        doc.content_tokens = content_tokens
+        doc.title_pos = title_pos
+        doc.content_pos = content_pos
+        
+        return doc
     
     def _normalize(self, text: str) -> str:
         """[Overwrite] Normalize string of input data.(Default: NFKC)"""
@@ -58,8 +59,8 @@ class Tokenization:
         """[OverWrite] Preprocessing stinrgs of input text data."""
         raise NotImplementedError()
     
-    def tokenize(self, doc: str) -> Tuple[List[str]]:
-        """[OverWrite] Tokenize the String to List of String. Return Dataclass is TextFeature.
+    def tokenize(self, text: str) -> Tuple[List[str]]:
+        """[OverWrite] Tokenize the String to List of String.
         * input : string
         * return : first list is token list and second list is pos list. 
             e.g.) (['쿠팡', '에서', '후기', '가', '좋길래', '닦토용', '으로', '샀는데', '별로에요', '....'],  ['L', 'R', 'L', 'R', 'L', 'L', 'R', 'L', 'L', 'R'])
@@ -68,13 +69,16 @@ class Tokenization:
         raise NotImplementedError()
     
     def _postprocess(self, doc: Tuple[List[str]]) -> Tuple[List[str]]:
-        """[OverWrite] Postprocessing for List of TextFeature"""
+        """[OverWrite] Postprocessing for tokenized data."""
         raise NotImplementedError()
 
         
 class TokenCandidateGeneration:
     """From tokenized token candidates, filter the candidates for keyphrase extraction"""
-    def get_candidate(self):
+    def __call__(self, doc: InputText) -> TextFeature:
+        return self.get_candidate(doc)
+    
+    def get_candidate(self, doc: InputText) -> TextFeature:
         """[OverWrite] Candidates extraction from token list"""
         raise NotImplementedError()
                 

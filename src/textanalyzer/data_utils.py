@@ -36,9 +36,15 @@ class InputText:
         content: string. The raw text for document's contents.
     """
 
+    # base 
     guid: str
     title: Optional[str] = None
     content: str = None
+    # tokenization
+    title_tokens: Optional[List[str]] = None
+    content_tokens: List[str] = None
+    title_pos: Optional[List[str]] = None
+    content_pos: Optional[List[str]] = None
     
 
     def to_json_string(self):
@@ -56,12 +62,25 @@ class TextFeature:
         {title, content}_pos: (Optional) List of String. Part-of-speeches for each token.
     """
     
-    title_tokens: List[str]
-    content_tokens: List[str]
-    
+    guid: str
+        
+    # title feature
+    title: Optional[str] = None
     title_pos: Optional[List[str]] = None
-    content_pos: Optional[List[str]] = None
-    #### more features with the development
+    title_unigram: Optional[List[str]] = None
+    title_bigram: Optional[List[str]] = None
+    title_trigram: Optional[List[str]] = None
+    title_4gram: Optional[List[str]] = None
+    title_candidate: Optional[List[str]] = None
+        
+    # content feature
+    content: str = None
+    content_pos: List[str] = None
+    content_unigram: List[str] = None
+    content_bigram: Optional[List[str]] = None
+    content_trigram: Optional[List[str]] = None
+    content_4gram: Optional[List[str]] = None
+    content_candidate: List[str] = None
     
     def to_json_string(self):
         """Serializes this instance to a JSON string."""

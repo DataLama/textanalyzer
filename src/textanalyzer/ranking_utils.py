@@ -20,8 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from typing import List, Union, Tuple
+
+from .data_utils import TextFeature
+
 class TokenRanking:
-    """From tokenized token candidates, filter the candidates for keyphrase extraction"""
-    def get_score(self):
-        """[OverWrite] Define the scalar score for ranking, and """
+    """From tokenized token candidates, extract keyphrases"""
+    def __call__(self, docs: List[TextFeature]) -> List[Tuple[str, float]]:
+        return self.get_score(docs)
+    
+    def get_score(self, docs: List[TextFeature]) -> List[Tuple[str, float]]:
+        """[OverWrite] Define the scalar score for ranking, and sort by the score"""
         raise NotImplementedError()

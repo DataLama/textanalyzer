@@ -35,7 +35,9 @@ setuptools.setup(
         "tqdm >= 4.27",
         # tokenizers
         "lac",
-        "soynlp"
+        "soynlp",
+        "lxml",
+        "beautifulsoup4"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
