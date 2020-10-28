@@ -26,62 +26,51 @@ from dataclasses import dataclass,field
 from typing import List, Optional, Union
 
 @dataclass
-class InputText:
+class Token:
     """
-    A single Document data for Text Data analysis.
+    Token-level textual-features. I recommend subclassing this dataclass for your needs.
     
     Args:
-        guid: Unique id for the example.
-        title: (Optional) string. The raw text for document's title.
-        content: string. The raw text for document's contents.
+        DocId: Unique id for the example. 
+        offset: Char-level position of the token in parent Document.
+                If offset is integer use offset and size to indexing the token in original document.
+                If offset is list use list to indexing the token int original document.
+        text: The raw text of Token. 
+        pos: Part-of-speeches after tokenizing.
     """
-
-    # base 
-    guid: str
-    title: Optional[str] = None
-    content: str = None
-    # tokenization
-    title_tokens: Optional[List[str]] = None
-    content_tokens: List[str] = None
-    title_pos: Optional[List[str]] = None
-    content_pos: Optional[List[str]] = None
+    DocId: str
+    offset: Union[int, List]
+    text: str
+    pos: str
     
-
-    def to_json_string(self):
-        """Serializes this instance to a JSON string."""
-        return json.dumps(dataclasses.asdict(self), indent=2) + "\n"
-
-
-@dataclass(frozen=True)
-class TextFeature:
-    """
-    The textual features of single Document.
-    
-    Args:
-        {title, content}_tokens: List of String. Tokenized token list for raw text.
-        {title, content}_pos: (Optional) List of String. Part-of-speeches for each token.
-    """
-    
-    guid: str
-        
-    # title feature
-    title: Optional[str] = None
-    title_pos: Optional[List[str]] = None
-    title_unigram: Optional[List[str]] = None
-    title_bigram: Optional[List[str]] = None
-    title_trigram: Optional[List[str]] = None
-    title_4gram: Optional[List[str]] = None
-    title_candidate: Optional[List[str]] = None
-        
-    # content feature
-    content: str = None
-    content_pos: List[str] = None
-    content_unigram: List[str] = None
-    content_bigram: Optional[List[str]] = None
-    content_trigram: Optional[List[str]] = None
-    content_4gram: Optional[List[str]] = None
-    content_candidate: List[str] = None
+    @property
+    def size(self):
+        """offset과 size를 활용하여 이 토큰이 원래 Document에 어디에 위치하는지 알 수 있음."""
+        return len(self.text)
     
     def to_json_string(self):
         """Serializes this instance to a JSON string."""
         return json.dumps(dataclasses.asdict(self)) + "\n"
+
+@dataclass
+class Doc:
+    """
+    Document-level textual-features. I recommend subclassing this dataclass for your needs.
+    
+    Args:
+        Id: Unique id for the example. 
+        text: The raw text of Doc.
+        tokens: List of Tokens.
+    """
+    Id: str
+    text: str
+    tokens: List[Token]
+        
+    @property
+    def size(self):
+        """Size of Document"""
+        return len(self.text)
+        
+    def to_json_string(self):
+        """Serializes this instance to a JSON string."""
+        return json.dumps(dataclasses.asdict(self), indent=2) + "\n"

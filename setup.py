@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="textanalyzer",
-    version="0.0.1",
+    version="0.0.3",
     author="Kim DongWook",
     author_email="kdw4521@gmail.com",
     description="Text Data Analysis module for analyzing text data in tabular data.",
@@ -22,7 +22,6 @@ setuptools.setup(
         "numpy",
         "pandas",
         "scikit-learn",
-        "emoji",
         # dataclasses for Python versions that don't have it
         "dataclasses;python_version<'3.7'",
         # utilities from PyPA to e.g. compare versions
@@ -33,7 +32,8 @@ setuptools.setup(
         "requests",
         # progress bars in model download and training scripts
         "tqdm >= 4.27",
-        # tokenizers
+        # tokenizers text preprocessing
+        "emoji",
         "lac",
         "soynlp",
         "lxml",
