@@ -168,11 +168,13 @@ class LACTokenization(Tokenization):
         
         for token in tokens:
             sliced_text = self.original_text[i:]
-            if token in re_meta:
-                search = re.search(re_meta[token], sliced_text)
-            else:
-                search = re.search(token, sliced_text)
-
+            
+            # 정규표현식 사용할 때, 메타문자가 토큰에 포함되어있을 경우 에러 발생함.
+            pattern = token
+            if set(pattern).intersection(re_meta.keys()) != set():
+                pattern = ''.join(map(lambda char:re_meta[char] if char in re_meta else char, pattern))
+            search = re.search(pattern, sliced_text)
+            
             if search:
                 start = search.start()
                 offsets.append((i+start))

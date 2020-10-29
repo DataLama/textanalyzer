@@ -30,10 +30,13 @@ from .data_utils import Doc, Token
 
 class Tokenization:
     """Base Class for Tokenization. This can be applied line by line."""
-    def __call__(self, doc: Dict) -> Doc:
+    def __call__(self, doc: Union[str, Dict]) -> Doc:
         """Tokenize the data with callable format."""        
         if type(doc) == dict:
             Id, text = list(doc.items())[0]
+        elif type(doc) == str:
+            Id = None
+            text = doc
         else:
             raise TypeError(f'The type of doc should be {dict} rather than {type(doc)}.')
         

@@ -1,4 +1,4 @@
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 # lac tokenizer를 활용한 중국어 키워드 추출 전용 tokenizer 개발
 
 
