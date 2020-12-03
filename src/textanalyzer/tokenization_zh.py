@@ -32,7 +32,7 @@ from LAC import LAC
 from soynlp.normalizer import repeat_normalize
 
 from .data_utils import Doc, Token
-from .process_utils import Tokenization, ZhPreprocessing
+from .process_utils import Tokenization, TokenCandidateGeneration, ZhPreprocessing
 
 
 class LACTokenization(Tokenization):
@@ -190,3 +190,20 @@ class LACTokenization(Tokenization):
                 offsets.append(l_offset)
                 i += start
         return offsets
+
+class LacTCG(TokenCandidateGeneration):
+    def __init__(self, ngram):
+        self.pos = {'LOC', 'ORG', 'PER', 'TIME', 'a', 'an', 'm', 'n', 'nr', 'ns', 'nt', 'nz', 'q', 's', 't', 'v', 'vn'}
+        self.N = ngram
+    
+    def get_candidate(self, doc: Doc) -> Doc:
+        unigram = [token for token in doc.tokens if (token.pos in self.pos) and (token.text.strip() != '')]
+        candidates = [unigram]
+        if self.N > 1:
+            for i in range(1, self.N):
+                candidates.append(self._ngram(unigram, (i+1)))
+        doc.candidates = candidates
+        return doc
+    
+    def _ngram(self, unigram: List[Token], n: int) -> List[Token]:
+        return [ngram for ngram in zip(*[unigram[i:] for i in range(n)])]
