@@ -72,7 +72,7 @@ class LACTokenization(Tokenization):
         text = self.preprocessor.rm_hashtag(text)
         text = self.preprocessor.rm_mention(text)
         text = self.preprocessor.rm_image(text)
-        return text
+        return text.strip()
         
     def _tokenize(self, text: str) -> Tuple[List[str]]:
         token, pos = self.lac.run(text)

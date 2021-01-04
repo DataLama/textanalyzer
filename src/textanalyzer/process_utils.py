@@ -30,7 +30,7 @@ from .data_utils import Doc, Token
 
 class Tokenization:
     """Base Class for Tokenization. This can be applied line by line."""
-    def __call__(self, doc: Union[str, Dict]) -> Doc:
+    def __call__(self, doc: Union[str, Dict], use_alignment:bool=False) -> Doc:
         """Tokenize the data with callable format."""        
         if type(doc) == dict:
             Id, text = list(doc.items())[0]
@@ -39,15 +39,25 @@ class Tokenization:
             text = doc
         else:
             raise TypeError(f'The type of doc should be {dict} rather than {type(doc)}.')
+        # normalize text before preprocessing
+        text = self._normalize(text)
         
         # if text is not None
         if text:
-            text = self._normalize(text)
             self.original_text = text # for alignment
-            tokens, pos = self.tokenize(text)
-            offsets = self._alignment((tokens, pos)) # offset of each
-            tokens = [Token(DocId=Id, offset=offset, text=tok, pos=p) 
-                      for tok, p, offset in zip(tokens, pos, offsets)]
+            text = self._preprocess(text)
+            if text:
+                tokens, pos = self.tokenize(text)
+                tokens = [Token(DocId=Id, text=tok, pos=p) for tok, p in zip(tokens, pos)]
+            else:
+                tokens = [Token(DocId=Id, text=self.original_text, pos='[invalid string]')]
+
+#             offsets = self._alignment((tokens, pos)) # offset of each
+#             tokens = [Token(DocId=Id, text=tok, pos=p) 
+#                       for tok, p, offset in zip(tokens, pos, offsets)]
+        else:
+            tokens = [Token(DocId=Id, text=text, pos='[empty string]')]                
+            
         
         # Return Doc
         return Doc(
@@ -87,7 +97,7 @@ class Tokenization:
         
     def tokenize(self, text: str) -> Tuple[List[str]]:
         """Tokenize the single string with pre, post processing."""
-        return self._postprocess(self._tokenize(self._preprocess(text)))
+        return self._postprocess(self._tokenize(text))
     
 
         
@@ -104,11 +114,12 @@ class TokenCandidateGeneration:
 class ZhPreprocessing:
     """All about chinese text preprocessing function in NLP"""
     def __init__(self):
+        emojis = "".join(emoji.UNICODE_EMOJI.keys())
         self.emoji = emoji.get_emoji_regexp()
-        self.pattern = re.compile(f'[^ .,?!/@$%~％·∼()。、，《 》“”：\x00-\x7F\u4e00-\u9fff{self.emoji}]+') # 기호, 영어, 중국어, 이모티콘
+        self.pattern = re.compile(f'[^ ％·∼。、，《 》“”：\x00-\x7F\u4e00-\u9fff{emojis}]+') # 기호, 영어, 중국어, 이모티콘
         self.url = re.compile(r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)')
         self.email = re.compile('([0-9a-zA-Z_]|[^\s^\w])+(@)[a-zA-Z]+.[a-zA-Z)]+')
-        self.hashtag = re.compile(f'#([{self.emoji.pattern}\w-]+)')
+        self.hashtag = re.compile(f'#([{emojis}\w-]+)')
         self.mention = re.compile(f'@([\w-]+)')
         self.image = re.compile(r'(\[image#0\d\])')
     
@@ -133,15 +144,16 @@ class ZhPreprocessing:
 
     def rm_image(self, text:str) -> str:
         return self.image.sub('', text)
-    
+
 class KoPreprocessing:
     """All about chinese text preprocessing function in NLP"""
     def __init__(self):
+        emojis = "".join(emoji.UNICODE_EMOJI.keys())
         self.emoji = emoji.get_emoji_regexp()
-        self.pattern = re.compile(f'[^ .,?!/@$%~％·∼()\x00-\x7Fㄱ-힣{self.emoji}]+') # 기호, 영어, 한글, 이모티콘
+        self.pattern = re.compile(f'[^ ％·∼\x00-\x7Fㄱ-ㅣ가-힣{emojis}]+') # 기호, 영어, 한글, 이모티콘
         self.url = re.compile(r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)')
         self.email = re.compile('([0-9a-zA-Z_]|[^\s^\w])+(@)[a-zA-Z]+.[a-zA-Z)]+')
-        self.hashtag = re.compile(f'#([{self.emoji.pattern}\w-]+)')
+        self.hashtag = re.compile(f'#([{emojis}\w-]+)')
         self.mention = re.compile(f'@([\w-]+)')
         self.image = re.compile(r'(\[image#0\d\])')
         self.white_space_character = re.compile(r'\s+')
@@ -176,3 +188,47 @@ class KoPreprocessing:
     
     def normalize_space(self, text:str) -> str:
         return self.white_space_character.sub(' ', text)
+
+    
+# class KoPreprocessing:
+#     """All about chinese text preprocessing function in NLP"""
+#     def __init__(self):
+#         self.emoji = emoji.get_emoji_regexp()
+#         self.pattern = re.compile(f'[^ .,?!/@$%~％·∼()\x00-\x7Fㄱ-힣{self.emoji}]+') # 기호, 영어, 한글, 이모티콘
+#         self.url = re.compile(r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)')
+#         self.email = re.compile('([0-9a-zA-Z_]|[^\s^\w])+(@)[a-zA-Z]+.[a-zA-Z)]+')
+#         self.hashtag = re.compile(f'#([{self.emoji.pattern}\w-]+)')
+#         self.mention = re.compile(f'@([\w-]+)')
+#         self.image = re.compile(r'(\[image#0\d\])')
+#         self.white_space_character = re.compile(r'\s+')
+    
+#     def normalize_korean_pattern(self, text:str) -> str:
+#         """영어, 한글, 이모지, 특수기호를 제외한 모든 것을 제거함."""
+#         return self.pattern.sub('', text)
+    
+#     def rm_url(self, text:str) -> str:
+#         return self.url.sub(' ', text)
+    
+#     def rm_email(self, text:str) -> str:
+#         return self.email.sub(' ', text)
+    
+#     def rm_emoji(self, text:str) -> str:
+#         return self.emoji.sub(' ', text)
+    
+#     def rm_mention(self, text:str) -> str:
+#         return self.mention.sub(' ', text)
+
+#     def rm_image(self, text:str) -> str:
+#         return self.image.sub(' ', text)
+    
+#     def rm_hashtag(self, text:str) -> str:
+#         return self.hashtag.sub(' ', text)
+    
+#     def spacing_hashtag(self, text:str) -> str:
+#         for ht in self.hashtag.findall(text):
+#             p = re.compile(f'#{ht}')
+#             text = p.sub(f' #{ht} ', text)
+#         return text
+    
+#     def normalize_space(self, text:str) -> str:
+#         return self.white_space_character.sub(' ', text)

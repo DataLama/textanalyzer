@@ -39,7 +39,6 @@ class Token:
         pos: Part-of-speeches after tokenizing.
     """
     DocId: str
-    offset: Union[int, List]
     text: str
     pos: str
     

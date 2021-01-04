@@ -68,7 +68,7 @@ class SoynlpTokenization(Tokenization):
         text = self.preprocessor.rm_hashtag(text)
         text = self.preprocessor.rm_mention(text)
         text = self.preprocessor.rm_image(text)
-        return text
+        return text.strip()
     
     def _tokenize(self, text: str) -> Tuple[List[str]]:
         return self.soy.tokenize(text, flatten=self._is_flatten, remove_r = self._is_remove_r)
