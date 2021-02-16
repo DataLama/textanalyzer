@@ -63,7 +63,10 @@ class Doc:
     """
     Id: str
     text: str
-    tokens: List[Token]
+    preprocessed_text: str
+    tokenizable: bool
+    tokens: List[Optional[Token]]
+        
         
     @property
     def size(self):

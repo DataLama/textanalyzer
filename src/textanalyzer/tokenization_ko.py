@@ -137,14 +137,18 @@ class SoynlpTCG(TokenCandidateGeneration):
         self.N = ngram
     
     def get_candidate(self, doc: Doc) -> Doc:
-        unigram = [token for token in doc.tokens 
-                   if (token.pos in self.pos) and (token.text.strip() != '')  and (re.search(r'[a-zA-Z0-9ㄱ-힣]', token.text) != None)]
-        candidates = [unigram]
-        if self.N > 1:
-            for i in range(1, self.N):
-                candidates.append(self._ngram(unigram, (i+1)))
-        doc.candidates = candidates
-        return doc
+        if doc.tokenizable:
+            unigram = [token for token in doc.tokens 
+                       if (token.pos in self.pos) and (token.text.strip() != '')  and (re.search(r'[a-zA-Z0-9ㄱ-힣]', token.text) != None)]
+            candidates = [unigram]
+            if self.N > 1:
+                for i in range(1, self.N):
+                    candidates.append(self._ngram(unigram, (i+1)))
+            doc.candidates = candidates
+            return doc
+        else:
+            doc.candidates = [[]]
+            return doc
     
     def _ngram(self, unigram: List[Token], n: int) -> List[Token]:
         return [ngram for ngram in zip(*[unigram[i:] for i in range(n)])]

@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="textanalyzer",
-    version="0.0.6",
+    version="0.0.8",
     author="Kim DongWook",
     author_email="kdw4521@gmail.com",
     description="Text Data Analysis module for analyzing text data in tabular data.",
@@ -34,9 +34,10 @@ setuptools.setup(
         "tqdm >= 4.27",
         # tokenizers text preprocessing
         "emoji",
-        "paddlepaddle==1.7.2",
+        "paddlepaddle >=1.7.2, <=1.8.4",
         "lac",
         "soynlp",
+        "konlpy"
         "lxml",
         "beautifulsoup4"
     ],
