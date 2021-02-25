@@ -23,56 +23,127 @@
 import json
 import dataclasses
 from dataclasses import dataclass,field
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 @dataclass
 class Token:
-    """
-    Token-level textual-features. I recommend subclassing this dataclass for your needs.
+    """Analyzing Token-Level Textual Features
+    
+    - Contains Id and raw text
+    - Contains Token-Level textual features
+    - Recommend subclassing this dataclass for your needs.
     
     Args:
-        DocId: Unique id for the example. 
-        offset: Char-level position of the token in parent Document.
-                If offset is integer use offset and size to indexing the token in original document.
-                If offset is list use list to indexing the token int original document.
-        text: The raw text of Token. 
-        pos: Part-of-speeches after tokenizing.
+        DocId: Unique id for the example.
+        offset: index of the token in the Doc.Tokens
+        start: begin index of the token in the Doc.text
+        end: end index of the token in the Doc.text
+        text: The raw text of Doc.
+        
     """
     DocId: str
+    offset: int
+    start: int
+    end: int
     text: str
-    pos: str
+    
+    def __post_init__(self):
+        self._features = dict()
+
+    def _update(self, features:Dict) -> None:
+        """Update features for parsed by attributes."""
+        key_set = []
+        for k, v in features.items():
+            setattr(self, k, v)
+            key_set.append(k)
+        print(f"New features {', '.join(key_set)} is updated.")
+    
+    def update_feature(self, features:Dict) -> None:
+        self._update(features)
+        self._features.update(**features)
     
     @property
-    def size(self):
-        """offset과 size를 활용하여 이 토큰이 원래 Document에 어디에 위치하는지 알 수 있음."""
+    def features(self) -> Dict:
+        """Get all features"""
+        return self._features
+        
+    @property
+    def size(self) -> int:
+        """Size of Document"""
         return len(self.text)
-    
-    def to_json_string(self):
-        """Serializes this instance to a JSON string."""
-        return json.dumps(dataclasses.asdict(self)) + "\n"
+        
+    def to_dict(self):
+        """Serializes this instance to dictionary."""
+        return dataclasses.asdict(self)
 
 @dataclass
 class Doc:
-    """
-    Document-level textual-features. I recommend subclassing this dataclass for your needs.
+    """Analyzing Document-Level Textual Features
+    
+    - Contains Id and raw text
+    - Contains Document-Level textual features
+    - Contains Chunked Result (Sents) and Tokenized Result (Tokens)
+    - Recommend subclassing this dataclass for your needs.
     
     Args:
         Id: Unique id for the example. 
         text: The raw text of Doc.
-        tokens: List of Tokens.
+        Tokens: List of Tokens. Tokens are the result of tokenization.
     """
     Id: str
     text: str
-    preprocessed_text: str
-    tokenizable: bool
-    tokens: List[Optional[Token]]
+    Tokens: List[Optional[Token]]
+    
+    def __post_init__(self):
+        self._features = dict()
+
+    def _update(self, features:Dict) -> None:
+        """Update features for parsed by attributes."""
+        key_set = []
+        for k, v in features.items():
+            setattr(self, k, v)
+            key_set.append(k)
+        print(f"New features {', '.join(key_set)} is updated.")
+    
+    def update_feature(self, features:Dict) -> None:
+        self._update(features)
+        self._features.update(**features)
+    
+    def __getitem__(self, idx):
+        """Doc class is basically the container of tokens."""
+        return self.Tokens[idx]
         
-        
+    def __len__(self):
+        """Length of Doc is token-level length"""
+        return len(self.Tokens)
+    
+    @property
+    def features(self) -> Dict:
+        """Get all features"""
+        return self._features
+    
     @property
     def size(self):
-        """Size of Document"""
+        """Size of Document as a char-level length"""
         return len(self.text)
         
-    def to_json_string(self):
-        """Serializes this instance to a JSON string."""
-        return json.dumps(dataclasses.asdict(self), indent=2) + "\n"
+    def to_dict(self):
+        """Serializes this instance to dictionary."""
+        return dataclasses.asdict(self)
+
+    
+
+# To-Do
+# * Add feature name checker
+# ```
+#     def _check_feature(self, features:Dict) -> None:
+#         """Check the name of features"""
+#         for k, _ in features.items():
+#             prefix = k.split('-')[0]
+#             condition = (prefix == 'tag') or (prefix == 'vec')
+#             if not condition:
+#                 raise ValueError(f"{k}'s prefix must be 'tag' or 'vec'.")
+                
+                
+#         self._check_feature(features)
+# ```

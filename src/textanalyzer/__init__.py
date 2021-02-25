@@ -7,5 +7,5 @@ from .data_utils import Doc, Token
 from .process_utils import Tokenization, TokenCandidateGeneration, ZhPreprocessing, KoPreprocessing
 
 # lac-tokenizer based chinese keyphrase extractor
-from .tokenization_zh import LACTokenization, LacTCG
-from .tokenization_ko import SoynlpTokenization, SoynlpTCG
+from .tokenization_lac import LACTokenization, LacTCG
+from .tokenization_soynlp import SoynlpTokenization, SoynlpTCG

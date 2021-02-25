@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="textanalyzer",
-    version="0.0.8",
+    version="0.1.0",
     author="Kim DongWook",
     author_email="kdw4521@gmail.com",
     description="Text Data Analysis module for analyzing text data in tabular data.",

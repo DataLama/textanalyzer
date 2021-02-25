@@ -1,0 +1,18 @@
+konlpy
+PyKomoran
+numpy
+pandas
+scikit-learn
+filelock
+requests
+tqdm >= 4.27
+emoji
+paddlepaddle <= 1.8.4
+pororo
+lac
+soynlp
+konlpy
+lxml
+beautifulsoup4
+pybind11
+python-mecab-ko

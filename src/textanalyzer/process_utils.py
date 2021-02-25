@@ -24,51 +24,70 @@ import re
 import emoji
 import unicodedata
 from typing import List, Union, Tuple, Dict, Iterator
+from pytz import timezone, utc
+from datetime import datetime
 
 from .data_utils import Doc, Token
 
 
 class Tokenization:
     """Base Class for Tokenization. This can be applied line by line."""
+    
     def __call__(self, doc: Union[str, Dict], use_alignment:bool=False) -> Doc:
-        """Tokenize the data with callable format."""        
+        Id, text = self._input_handler(doc)
+        normalized_text = self._normalize(text)
+        
+        if text:
+            preprocessed_text = self._preprocess(normalized_text)
+            if preprocessed_text:
+                # Token
+                tokens, pos = self.tokenize(preprocessed_text)
+                token_indices = self._alignment(normalized_text, tokens)
+                proc_tokens = []
+                for offset, (tok, p, (start, end))  in enumerate(zip(tokens, pos, token_indices)):
+                    token = Token(
+                        DocId = Id,
+                        offset = offset,
+                        start = start,
+                        end = end,
+                        text = tok
+                    )
+                    token.update_feature({"_pos": p})
+                    proc_tokens.append(token)
+                    
+                tokens = proc_tokens
+                tokenizable = True
+            else:
+                # No token after preprocess
+                tokens = []
+                tokenizable = False
+        else:
+            # empty string
+            tokens = []
+            tokenizable = False
+            
+        # Doc
+        doc = Doc(
+            Id = Id,
+            text = normalized_text,
+            tokens = tokens
+        )
+        doc.update_feature({"_tokenizable" : tokenizable})
+        return doc
+    
+    
+    def _input_handler(self, doc: Union[str, Dict]) -> Tuple:
         if type(doc) == dict:
             Id, text = list(doc.items())[0]
         elif type(doc) == str:
-            Id = None
+            KST = timezone('Asia/Seoul')
+            now = datetime.utcnow()
+            today = utc.localize(now).astimezone(KST)
+            Id = today.strftime('%Y%m%d-%H%M%S-%f')
             text = doc
         else:
             raise TypeError(f'The type of doc should be {dict} rather than {type(doc)}.')
-        # normalize text before preprocessing
-        preprocessed_text = self._normalize(text)
-        
-        # if text is not None
-        if text:
-#             self.original_text = text # for alignment
-            preprocessed_text = self._preprocess(preprocessed_text)
-            if preprocessed_text:
-                tokens, pos = self.tokenize(preprocessed_text)
-                tokens = [Token(DocId=Id, text=tok, pos=p) for tok, p in zip(tokens, pos)]
-                tokenizable = True
-            else:
-                tokens = []
-                tokenizable = False
-
-#             offsets = self._alignment((tokens, pos)) # offset of each
-#             tokens = [Token(DocId=Id, text=tok, pos=p) 
-#                       for tok, p, offset in zip(tokens, pos, offsets)]
-        else:
-            tokens = []
-            tokenizable = False
-
-        # Return Doc
-        return Doc(
-            Id = Id,
-            text = text,
-            preprocessed_text = preprocessed_text,
-            tokenizable = tokenizable,
-            tokens = tokens
-        )
+        return Id, text
     
     def _normalize(self, text: str) -> str:
         """[Overwrite] Normalize string of input data.(Default: NFKC)"""
@@ -93,11 +112,21 @@ class Tokenization:
         """[OverWrite] Postprocessing for tokenized data."""
         raise NotImplementedError()
         
-    def _alignment(self, doc: Tuple[List[str]]) -> List:
-        """[OverWrite] Calculate the offset of token in the document. 
-        * highly recommend to return iterator
-        """
-        raise NotImplementedError()
+    def _alignment(self, text:str, tokens:List) -> List:
+        """Calculate the alignment of tokens in the normalized text."""
+        token_indices = []
+        offset = 0
+        
+        for tok in tokens:
+            start = text.index(tok)
+            indices.append((
+                offset + start,
+                offset + start + len(tok)
+            ))
+            offset += start + len(tok)
+            text = text[start + len(tok):]
+        return token_indices
+
         
     def tokenize(self, text: str) -> Tuple[List[str]]:
         """Tokenize the single string with pre, post processing."""
