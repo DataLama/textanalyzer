@@ -16,3 +16,4 @@ lxml
 beautifulsoup4
 pybind11
 python-mecab-ko
+streamlit

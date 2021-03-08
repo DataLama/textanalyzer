@@ -56,7 +56,6 @@ class Token:
         for k, v in features.items():
             setattr(self, k, v)
             key_set.append(k)
-        print(f"New features {', '.join(key_set)} is updated.")
     
     def update_feature(self, features:Dict) -> None:
         self._update(features)
@@ -71,10 +70,7 @@ class Token:
     def size(self) -> int:
         """Size of Document"""
         return len(self.text)
-        
-    def to_dict(self):
-        """Serializes this instance to dictionary."""
-        return dataclasses.asdict(self)
+    
 
 @dataclass
 class Doc:
@@ -103,7 +99,6 @@ class Doc:
         for k, v in features.items():
             setattr(self, k, v)
             key_set.append(k)
-        print(f"New features {', '.join(key_set)} is updated.")
     
     def update_feature(self, features:Dict) -> None:
         self._update(features)
@@ -127,23 +122,33 @@ class Doc:
         """Size of Document as a char-level length"""
         return len(self.text)
         
-    def to_dict(self):
+    def to_dict(self) -> Dict:
         """Serializes this instance to dictionary."""
-        return dataclasses.asdict(self)
-
+        dump = dataclasses.asdict(self)
+        dump.update({'doc_features':self.features})
+        for d, t in zip(dump['Tokens'], self.Tokens):
+            d.update({'token_features':t.features})
+        return dump
     
-
-# To-Do
-# * Add feature name checker
-# ```
-#     def _check_feature(self, features:Dict) -> None:
-#         """Check the name of features"""
-#         for k, _ in features.items():
-#             prefix = k.split('-')[0]
-#             condition = (prefix == 'tag') or (prefix == 'vec')
-#             if not condition:
-#                 raise ValueError(f"{k}'s prefix must be 'tag' or 'vec'.")
-                
-                
-#         self._check_feature(features)
-# ```
+    @classmethod
+    def from_dict(cls, data:Dict):
+        # token
+        Tokens = []
+        for tok in data['Tokens']:
+            token = Token(
+                    DocId = tok['DocId'],
+                    offset = tok['offset'],
+                    start = tok['start'],
+                    end = tok['end'],
+                    text = tok['text'],
+                )
+            token.update_feature(tok['token_features'])
+            Tokens.append(token)
+        # doc
+        doc = cls(
+            Id = data['Id'],
+            text = data['text'],
+            Tokens = Tokens
+        )
+        doc.update_feature(data['doc_features'])
+        return doc

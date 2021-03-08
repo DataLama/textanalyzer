@@ -159,37 +159,6 @@ class LACTokenization(Tokenization):
             
         return new_token, new_pos
     
-    def _alignment(self, doc: Tuple[List[str]]) -> List:
-        """Only use token to alignment."""
-        i = 0
-        offsets = []
-        tokens = doc[0]
-        re_meta = {char:f'\\{char}' for char in '$()*+.?[]\^{}|-'}
-        
-        for token in tokens:
-            sliced_text = self.original_text[i:]
-            
-            # 정규표현식 사용할 때, 메타문자가 토큰에 포함되어있을 경우 에러 발생함.
-            pattern = token
-            if set(pattern).intersection(re_meta.keys()) != set():
-                pattern = ''.join(map(lambda char:re_meta[char] if char in re_meta else char, pattern))
-            search = re.search(pattern, sliced_text)
-            
-            if search:
-                start = search.start()
-                offsets.append((i+start))
-                i += (start + len(token))
-            else: # 어떤 토큰이 original text에 없을 경우 => 전처리 과정에서 text가 변함.
-                l_offset = []
-                for tok in token:
-                    if tok in re_meta:
-                        start = re.search(re_meta[tok], sliced_text).start()
-                    else:
-                        start = re.search(tok, sliced_text).start()
-                    l_offset.append((i+start))
-                offsets.append(l_offset)
-                i += start
-        return offsets
 
 class LacTCG(TokenCandidateGeneration):
     def __init__(self, ngram):

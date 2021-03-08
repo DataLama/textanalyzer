@@ -9,3 +9,4 @@ from .process_utils import Tokenization, TokenCandidateGeneration, ZhPreprocessi
 # lac-tokenizer based chinese keyphrase extractor
 from .tokenization_lac import LACTokenization, LacTCG
 from .tokenization_soynlp import SoynlpTokenization, SoynlpTCG
+from .tokenization_mecab import MecabTokenization
