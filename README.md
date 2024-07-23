@@ -1,5 +1,6 @@
-# textanalyzer
-Text Data Analysis module for analyzing text data in tabular data.
+# TextAnalyzer
+TextAnalyzer helps you to get insights from textual data easily.
 
-- 이모지 추가
-- readme 만들기
+### Integration
+* huggingface's datasets
+* spacy to handle nested data.

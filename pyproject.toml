@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "textanalyzer"
+version = "0.1.1"
+description = "TextAnalyzer is a Python package that allows you to quickly and easily understand complex text data."
+authors = [
+    {name = "Kim DongWook", email = "kdw4521@gmail.com"}
+]
+license = {text = "Apache-2.0"}
+readme = "README.md"
+requires-python = ">=3.9.0"
+keywords = ["NLU", "NLP", "text analysis", "LLM"]
+dependencies = [
+    "omegaconf",
+    "tqdm",
+    "spacy",
+    "datasets",
+    "transformers",
+    "tiktoken",
+    "datasketch",
+    "xxhash",
+
+    # langcahin
+    "langchain",
+    "langchain_community"
+]
+[project.optional-dependencies]
+ko = [
+    "python-mecab-ko",
+    "kss"
+]
+
+[project.urls]
+Homepage = "https://github.com/DataLama/textanalyzer"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
