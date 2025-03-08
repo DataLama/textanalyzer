@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "textanalyzer"
-version = "0.1.1"
+version = "0.2.0"
 description = "TextAnalyzer is a Python package that allows you to quickly and easily understand complex text data."
 authors = [
     {name = "Kim DongWook", email = "kdw4521@gmail.com"}
@@ -19,13 +19,18 @@ dependencies = [
     "spacy",
     "datasets",
     "transformers",
+    "accelerate",
     "tiktoken",
     "datasketch",
     "xxhash",
+    "bertopic",
+    "einops",
 
     # langcahin
     "langchain",
-    "langchain_community"
+    "langchain-huggingface",
+    "langchain-openai",
+    "langgraph"
 ]
 [project.optional-dependencies]
 ko = [

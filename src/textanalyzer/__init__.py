@@ -1,0 +1,1 @@
+from .core.ko import Korean
